@@ -1,0 +1,479 @@
+% Created 2022-03-29 Tue 18:31
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{color}
+\usepackage{listings}
+\author{Santiago Pedroza Díaz}
+\date{\today}
+\title{Algoritmario}
+\hypersetup{
+ pdfauthor={Santiago Pedroza Díaz},
+ pdftitle={Algoritmario},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 27.2 (Org mode 9.4.4)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+\section{Introducción}
+\label{sec:org92cb10b}
+
+Este es el algoritmario que e estado haciendo conforme a pasado el tiempo.
+Si utilizas \texttt{Emacs} puedes exportar a \texttt{pdf} o \texttt{epub} si son más cómodos que una página
+web.
+
+\section{Estructuras de Datos de mortales y medio mortales}
+\label{sec:orgf2092aa}
+
+\subsection{Clásicas}
+\label{sec:org2166eb8}
+
+\subsubsection{Stack}
+\label{sec:org0c90c3b}
+
+\subsubsection{Queue}
+\label{sec:org85f1cd5}
+
+\subsubsection{Linked List}
+\label{sec:org9e79f8c}
+
+\subsection{Logarítmicas}
+\label{sec:org3768528}
+
+\subsubsection{Priority Queue}
+\label{sec:orgb34a23e}
+
+\subsubsection{Multiset}
+\label{sec:orgd1d89e6}
+
+\section{Gráficas}
+\label{sec:orgbe5c12b}
+\subsection{Representaciónes de Gráficas}
+\label{sec:org81d6ea2}
+\subsubsection{Matrices de adyacencia}
+\label{sec:orgced0394}
+
+\subsubsection{Matrices de}
+\label{sec:org0e96fce}
+
+\subsection{BFS y DFS}
+\label{sec:org964fd18}
+\subsubsection{DFS}
+\label{sec:org64fa341}
+
+\subsubsection{BFS}
+\label{sec:org842a5ee}
+\subsection{Disjointed Set Union (DSU)}
+\label{sec:org0184f43}
+\subsubsection{Union by Rank}
+\label{sec:org21a521b}
+
+Funcion en tiempo \(O(log(N))\) por operación.
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+struct DSU {
+	vector<int> P, H;
+	DSU(int n) : P(n), H(n, 0) {
+		for(int i = 0; i < n; i++)
+			P[i] = i;
+	}
+	int find(int x) {
+		if(P[x] == x) {
+			return x;
+		}
+		return find(P[x]);
+	}
+	void merge(int x, int y) {
+		int RootX = find(x);
+		int RootY = finx(y);
+		if (H[RootX] > H[RootY]) {
+			swap(rootX, rootY);
+		}
+		P[RootX] = RootY;
+		if (H[RootX] == H[RootY]) {
+			H[RootY]++;
+		}
+	}
+}
+\end{lstlisting}
+\subsubsection{Path Compression}
+\label{sec:org5e0c0c8}
+
+Es bastante rápida y en la práctica si quieres implementar algo desde
+cero puedes llegar a usarla. Corre en tiempo \(O(log(N))\) amortizado.
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+struct DSU {
+	vector<int> P;
+	DSU(int n) : P(n) {
+		for(int i = 0; i < n; i++) {
+			P[i] = i;
+		}
+	}
+	int find(int x) {
+		if (P[x] == x) {
+			return x;
+		}
+		return P[x] = find(P[x]);
+	}
+	void merge(int x, int y) {
+		P[find(x)] = find(y);
+	}
+}
+\end{lstlisting}
+\subsubsection{Union by Rank y Path Compression}
+\label{sec:org53fd00b}
+
+Funciona en \(O(\alpha(N))\) amortizado y siendo realista es la única que vas a necesitar.
+
+\(\alpha\): es la función inversa de Ackerman, es casi \(O(1)\).
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+struct DSU {
+	vector<int> P, H;
+	DSU(int n) : P(n), H(n, 0) {
+		for (int i = 0; i < n; ++i) {
+			P[i] = i;
+		}
+	}
+	int find(int x) {
+		if (P[x] == x) {
+			return x;
+		}
+		return P[x] = find(P[x]);
+	}
+	void merge(int x, int y) {
+		int rx = find(x);
+		int ry = find(y);
+		if(H[rx] > H[ry])
+			swap(rx, ry);
+		P[rx] = ry;
+		if (H[rx] == H[ry]) {
+			H[ry]++;
+		}
+	}
+	bool same(int a, int b) {
+		return find(a) == find(b);
+	}
+	void print() {
+		for(auto x : P) {
+			cout << x << " ";
+		}
+		std::cout << "\n";
+	}
+};
+\end{lstlisting}
+
+\subsection{MST}
+\label{sec:org1f8e89b}
+\subsubsection{Kruskal}
+\label{sec:org4a3af96}
+
+Vamos a utilizar un DSU con una ligera modificación,
+ahora vamos a ponerle same.
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+struct DSU {
+	// DSU de la parte anterior
+	bool same(int x, int y) {
+		return find(x) == find(y);
+	}
+};
+\end{lstlisting}
+
+El código de Kruskal en:
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+priority_queue<tuple<int,int,int>> pq; // w, a, b
+int a, b, c;
+for (int i = 0; i < m; ++i) {
+	cin >> a >> b >> c;
+	pq.push({-1*c,a,b});
+ }
+DSU dsu(n+1);
+long long ans = 0;
+int size = 0;
+while (!pq.empty()) {
+	int w, a, b;
+	tie(w,a,b) = pq.top();
+	pq.pop();
+	if (!dsu.same(a, b)) {
+		size = max(dsu.merge(a, b), size);
+		cout << w*-1 << "\n";
+		ans += (w*-1);
+	}
+ }
+\end{lstlisting}
+
+\subsubsection{Prim}
+\label{sec:org4482d32}
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+ll prim(int start, vector<bool> &visited, const vector<vector<pair<int, int>>> &adj) {
+	priority_queue<tuple<int, int>> pq;
+	ll ans = 0, counter = 1;
+	visited[start] = true;
+	for(auto a : adj[start]) {
+		pq.push({-1*a.second, a.first});
+	}
+
+	while (!pq.empty()) {
+		int w, node;
+		tie(w, node) = pq.top();
+		pq.pop();
+		if (visited[node]) continue;
+		ans+=w*-1;
+		counter++;
+		visited[node] = true;
+		for(auto a : adj[node]) {
+			pq.push({a.second*-1,a.first});
+		}
+	}
+	return  ans;
+}
+\end{lstlisting}
+\subsection{Single Source Shortest Path}
+\label{sec:org9d0c31a}
+\subsubsection{Dijikstra}
+\label{sec:orga8c5a81}
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+vector<vector<pair<ll,ll>>> adj(n+1); // b, w
+priority_queue<tuple<ll, ll>> pq; // w, a
+vector<ll> distance(n+1, INF);
+
+ll a, b, c;
+for (int i = 0; i < m; ++i) {
+	cin >> a >> b >> c;
+	adj[a].push_back({b,c});
+ }
+
+pq.push({0,1});
+distance[1] = 0;
+
+while (!pq.empty()) {
+	ll w, a;
+	tie(w, a) = pq.top();
+	pq.pop();
+	if(processed[a]) continue;
+	processed[a] = true; 
+	for(auto u : adj[a]) {
+		ll b = u.first, w = u.second;
+		if (distance[a]+w < distance[b]) {
+			distance[b] = distance[a]+w;
+			pq.push({-1*distance[b], b});
+		}
+	}
+ }
+\end{lstlisting}
+\subsubsection{Bellman Ford}
+\label{sec:org8bdc4bc}
+
+\subsubsection{Floyd Warshall \(O(n^3)\)}
+\label{sec:org8c8834f}
+
+Sirve para cuando te preguntan varias veces la misma pregunta
+de encontrar el camino más corto.
+
+Usas una matriz de adyacencias.
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+// Inicializar matriz de adyacencias
+for(int i = 0; i < n; i++) {
+	for(int j = 0; j < n; j++) {
+		if(i == j) mat[i][j] = 0;
+		else mat[i][j] = INF;
+	}
+ }
+
+// procesar la matriz de adyacencias y cambiar los valores
+// de los caminos conocidos
+
+// Floyd Warshall
+for(int i = 0; i < n; i++) {
+	for(int j = 0; j < n; j++) {
+		for(int k = 0; k < n; k++) {
+			mat[j][k]=min(mat[j][k], mat[j][i]+mat[i][k]);
+		}
+	}
+ }
+\end{lstlisting}
+
+\section{Árboles}
+\label{sec:org7b242bd}
+
+\subsubsection{Árboles Binarios}
+\label{sec:org3f81275}
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+struct node {
+	int val;
+	node *right, *left;
+	node(int v) : val(v), right(nullptr), left(nullptr){}
+	node() : val(0), right(nullptr), left(nullptr){}
+};
+\end{lstlisting}
+
+\begin{enumerate}
+\item Recorrer un árbol binario
+\label{sec:org405f023}
+
+Los códigos de inorden, orden y postorden tienen la misma idea de trasfondo.
+La única diferencia es el momento en donde visitas el valor actual en el que
+estás o lo dejas en el stack recursivo.
+
+El recorrido por niveles es el único que cambia ya que en este caso tenemos
+que hacer una exploración con una queue.
+
+\begin{enumerate}
+\item Inorden
+\label{sec:org3bcbc77}
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+void inorden(node *root) {
+	if(root == nullptr) return;
+	cout << root->val << " ";
+	inorden(root->left);
+	inorden(root->right);
+}
+\end{lstlisting}
+
+\item Orden
+\label{sec:orgd7e2de9}
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+void orden(node *root) {
+	if(root == nullptr) return;
+	orden(root->left);
+	cout << root->val << " ";
+	orden(root->right);
+}
+\end{lstlisting}
+
+\item Postorden
+\label{sec:org3354989}
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+void postorden(node *root) {
+	if(root == nullptr) return;
+	postorden(root->left);
+	postorden(root->right);
+	cout << root->val << " ";
+}
+\end{lstlisting}
+
+\item Orden por Nivel
+\label{sec:orgdc3987d}
+
+Una BFS.
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+queue<tuple<TreeNode*, int>> q;
+vector<vector<int>> ans;
+q.push({root, 0});
+while(!q.empty()) {
+	TreeNode* node;
+	int CurrentDepth;
+	tie(node, CurrentDepth) = q.front();
+	q.pop();
+	if(node == nullptr) continue;
+	if(ans.size() <= CurrentDepth)
+		ans.resize(CurrentDepth+1);
+	ans[CurrentDepth].push_back(node->val);
+	q.push({node->left, CurrentDepth+1});
+	q.push({node->right, CurrentDepth+1});
+ }
+\end{lstlisting}
+\end{enumerate}
+\end{enumerate}
+\subsubsection{Árboles Binarios de Búsqueda}
+\label{sec:org65eed38}
+
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+class Node {
+public:
+	int val;
+	Node *right, *left;
+
+	Node(int v) : val(v), right(nullptr), left(nullptr){}
+	Node() : val(0), right(nullptr), left(nullptr){}
+};
+
+Node* add(Node *root, int val) {
+	if(root == nullptr) {
+		return new Node(val);
+	}
+	if(root->val<val) {
+		root->right = add(root->right, val);
+	} else {
+		root->left = add(root->left, val);
+	}
+	return root;
+}
+bool find(Node *root, int val) {
+  if (root == nullptr) {
+		return false;
+  }
+  if (root->val == val) {
+		return true;
+  }
+	if(val > root->val) {
+		return find(root->right, val);
+	}
+
+	return find(root->left,val);
+}
+\end{lstlisting}
+\subsubsection{Árbol N-ario}
+\label{sec:org6ddbaf2}
+\lstset{language=C++,label= ,caption= ,captionpos=b,numbers=none}
+\begin{lstlisting}
+struct node {
+	int val;
+	vector<node*> children;
+};
+\end{lstlisting}
+
+\section{Matemáticas}
+\label{sec:orgbca84e3}
+
+\subsection{Criba de Erastostenes}
+\label{sec:org428ca0d}
+
+\subsection{Exponenciación Binaria}
+\label{sec:org0611e5c}
+
+\subsection{Propiedades de los módulos}
+\label{sec:org731f0cf}
+
+\subsection{Supuesto Big Int en C++ sin que sea Big Int (o como usar strings)}
+\label{sec:orga538b9f}
+\end{document}
