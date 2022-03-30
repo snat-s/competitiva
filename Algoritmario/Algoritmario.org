@@ -1,0 +1,400 @@
+#+title: Algoritmario
+#+author: Santiago Pedroza Díaz
+#+startup: indent latexpreview
+
+* Introducción
+
+  Este es el algoritmario que e estado haciendo conforme a pasado el tiempo.
+  Si utilizas =Emacs= puedes exportar a =pdf= o =epub= si son más cómodos que una página
+  web.
+
+* Estructuras de Datos de mortales y medio mortales
+ 
+** Clásicas
+
+*** Stack
+
+*** Queue
+
+*** Linked List
+    
+** Logarítmicas
+
+*** Priority Queue
+
+*** Multiset
+
+* Gráficas
+** Representaciónes de Gráficas
+*** Matrices de adyacencia
+
+*** Matrices de 
+
+** BFS y DFS
+*** DFS
+    #+begin_src C++
+
+    #+end_src
+
+*** BFS
+
+    #+begin_src C++
+
+    #+end_src
+** Disjointed Set Union (DSU)
+*** Union by Rank
+
+    Funcion en tiempo $O(log(N))$ por operación.
+
+    #+begin_src C++
+    struct DSU {
+	    vector<int> P, H;
+	    DSU(int n) : P(n), H(n, 0) {
+		    for(int i = 0; i < n; i++)
+			    P[i] = i;
+	    }
+	    int find(int x) {
+		    if(P[x] == x) {
+			    return x;
+		    }
+		    return find(P[x]);
+	    }
+	    void merge(int x, int y) {
+		    int RootX = find(x);
+		    int RootY = finx(y);
+		    if (H[RootX] > H[RootY]) {
+			    swap(rootX, rootY);
+		    }
+		    P[RootX] = RootY;
+		    if (H[RootX] == H[RootY]) {
+			    H[RootY]++;
+		    }
+	    }
+    }
+    #+end_src
+*** Path Compression
+
+    Es bastante rápida y en la práctica si quieres implementar algo desde
+    cero puedes llegar a usarla. Corre en tiempo $O(log(N))$ amortizado.
+
+    #+begin_src C++
+    struct DSU {
+	    vector<int> P;
+	    DSU(int n) : P(n) {
+		    for(int i = 0; i < n; i++) {
+			    P[i] = i;
+		    }
+	    }
+	    int find(int x) {
+		    if (P[x] == x) {
+			    return x;
+		    }
+		    return P[x] = find(P[x]);
+	    }
+	    void merge(int x, int y) {
+		    P[find(x)] = find(y);
+	    }
+    }
+    #+end_src
+*** Union by Rank y Path Compression
+
+    Funciona en $O(\alpha(N))$ amortizado y siendo realista es la única que vas a necesitar.
+
+    $\alpha$: es la función inversa de Ackerman, es casi $O(1)$.
+
+    #+begin_src C++
+    struct DSU {
+	    vector<int> P, H;
+	    DSU(int n) : P(n), H(n, 0) {
+		    for (int i = 0; i < n; ++i) {
+			    P[i] = i;
+		    }
+	    }
+	    int find(int x) {
+		    if (P[x] == x) {
+			    return x;
+		    }
+		    return P[x] = find(P[x]);
+	    }
+	    void merge(int x, int y) {
+		    int rx = find(x);
+		    int ry = find(y);
+		    if(H[rx] > H[ry])
+			    swap(rx, ry);
+		    P[rx] = ry;
+		    if (H[rx] == H[ry]) {
+			    H[ry]++;
+		    }
+	    }
+	    bool same(int a, int b) {
+		    return find(a) == find(b);
+	    }
+	    void print() {
+		    for(auto x : P) {
+			    cout << x << " ";
+		    }
+		    std::cout << "\n";
+	    }
+    };
+    #+end_src
+
+** MST
+*** Kruskal
+
+    Vamos a utilizar un DSU con una ligera modificación,
+    ahora vamos a ponerle same.
+
+    #+begin_src C++
+    struct DSU {
+	    // DSU de la parte anterior
+	    bool same(int x, int y) {
+		    return find(x) == find(y);
+	    }
+    };
+    #+end_src
+
+    El código de Kruskal en:
+    #+begin_src C++
+    priority_queue<tuple<int,int,int>> pq; // w, a, b
+    int a, b, c;
+    for (int i = 0; i < m; ++i) {
+	    cin >> a >> b >> c;
+	    pq.push({-1*c,a,b});
+     }
+    DSU dsu(n+1);
+    long long ans = 0;
+    int size = 0;
+    while (!pq.empty()) {
+	    int w, a, b;
+	    tie(w,a,b) = pq.top();
+	    pq.pop();
+	    if (!dsu.same(a, b)) {
+		    size = max(dsu.merge(a, b), size);
+		    cout << w*-1 << "\n";
+		    ans += (w*-1);
+	    }
+     }
+    #+end_src
+    
+*** Prim
+
+    #+begin_src C++
+    ll prim(int start, vector<bool> &visited, const vector<vector<pair<int, int>>> &adj) {
+	    priority_queue<tuple<int, int>> pq;
+	    ll ans = 0, counter = 1;
+	    visited[start] = true;
+	    for(auto a : adj[start]) {
+		    pq.push({-1*a.second, a.first});
+	    }
+		
+	    while (!pq.empty()) {
+		    int w, node;
+		    tie(w, node) = pq.top();
+		    pq.pop();
+		    if (visited[node]) continue;
+		    ans+=w*-1;
+		    counter++;
+		    visited[node] = true;
+		    for(auto a : adj[node]) {
+			    pq.push({a.second*-1,a.first});
+		    }
+	    }
+	    return  ans;
+    }
+    #+end_src
+** Single Source Shortest Path
+*** Dijikstra
+    #+begin_src C++
+    vector<vector<pair<ll,ll>>> adj(n+1); // b, w
+    priority_queue<tuple<ll, ll>> pq; // w, a
+    vector<ll> distance(n+1, INF);
+	
+    ll a, b, c;
+    for (int i = 0; i < m; ++i) {
+	    cin >> a >> b >> c;
+	    adj[a].push_back({b,c});
+     }
+	
+    pq.push({0,1});
+    distance[1] = 0;
+
+    while (!pq.empty()) {
+	    ll w, a;
+	    tie(w, a) = pq.top();
+	    pq.pop();
+	    if(processed[a]) continue;
+	    processed[a] = true; 
+	    for(auto u : adj[a]) {
+		    ll b = u.first, w = u.second;
+		    if (distance[a]+w < distance[b]) {
+			    distance[b] = distance[a]+w;
+			    pq.push({-1*distance[b], b});
+		    }
+	    }
+     }
+    #+end_src
+*** Bellman Ford
+
+    #+begin_src C++
+
+    #+end_src
+
+*** Floyd Warshall $O(n^3)$
+
+    Sirve para cuando te preguntan varias veces la misma pregunta
+    de encontrar el camino más corto.
+
+    Usas una matriz de adyacencias.
+    
+     #+begin_src C++
+     // Inicializar matriz de adyacencias
+     for(int i = 0; i < n; i++) {
+             for(int j = 0; j < n; j++) {
+                     if(i == j) mat[i][j] = 0;
+                     else mat[i][j] = INF;
+             }
+      }
+
+     // procesar la matriz de adyacencias y cambiar los valores
+     // de los caminos conocidos
+
+     // Floyd Warshall
+     for(int i = 0; i < n; i++) {
+             for(int j = 0; j < n; j++) {
+                     for(int k = 0; k < n; k++) {
+                             mat[j][k]=min(mat[j][k], mat[j][i]+mat[i][k]);
+                     }
+             }
+      }
+#+end_src
+
+* Árboles
+
+*** Árboles Binarios
+
+#+begin_src C++
+struct node {
+	int val;
+	node *right, *left;
+	node(int v) : val(v), right(nullptr), left(nullptr){}
+	node() : val(0), right(nullptr), left(nullptr){}
+};
+#+end_src
+
+**** Recorrer un árbol binario
+
+Los códigos de inorden, orden y postorden tienen la misma idea de trasfondo.
+La única diferencia es el momento en donde visitas el valor actual en el que
+estás o lo dejas en el stack recursivo.
+
+El recorrido por niveles es el único que cambia ya que en este caso tenemos
+que hacer una exploración con una queue.
+
+***** Inorden
+
+#+begin_src C++
+void inorden(node *root) {
+	if(root == nullptr) return;
+	cout << root->val << " ";
+	inorden(root->left);
+	inorden(root->right);
+}
+#+end_src
+
+***** Orden
+
+#+begin_src C++
+void orden(node *root) {
+	if(root == nullptr) return;
+	orden(root->left);
+	cout << root->val << " ";
+	orden(root->right);
+}
+#+end_src
+
+***** Postorden
+
+#+begin_src C++
+void postorden(node *root) {
+	if(root == nullptr) return;
+	postorden(root->left);
+	postorden(root->right);
+	cout << root->val << " ";
+}
+#+end_src
+
+***** Orden por Nivel
+
+Una BFS.
+#+begin_src C++
+queue<tuple<TreeNode*, int>> q;
+vector<vector<int>> ans;
+q.push({root, 0});
+while(!q.empty()) {
+	TreeNode* node;
+	int CurrentDepth;
+	tie(node, CurrentDepth) = q.front();
+	q.pop();
+	if(node == nullptr) continue;
+	if(ans.size() <= CurrentDepth)
+                ans.resize(CurrentDepth+1);
+	ans[CurrentDepth].push_back(node->val);
+	q.push({node->left, CurrentDepth+1});
+	q.push({node->right, CurrentDepth+1});
+ }
+#+end_src
+*** Árboles Binarios de Búsqueda
+
+#+begin_src C++
+class Node {
+public:
+	int val;
+	Node *right, *left;
+
+	Node(int v) : val(v), right(nullptr), left(nullptr){}
+	Node() : val(0), right(nullptr), left(nullptr){}
+};
+
+Node* add(Node *root, int val) {
+	if(root == nullptr) {
+		return new Node(val);
+	}
+	if(root->val<val) {
+		root->right = add(root->right, val);
+	} else {
+		root->left = add(root->left, val);
+	}
+	return root;
+}
+bool find(Node *root, int val) {
+  if (root == nullptr) {
+		return false;
+  }
+  if (root->val == val) {
+		return true;
+  }
+	if(val > root->val) {
+		return find(root->right, val);
+	}
+
+	return find(root->left,val);
+}
+#+end_src
+*** Árbol N-ario
+#+begin_src C++
+struct node {
+	int val;
+	vector<node*> children;
+};
+#+end_src
+
+* Matemáticas
+
+** Criba de Erastostenes
+
+** Exponenciación Binaria
+
+** Propiedades de los módulos
+
+** Supuesto Big Int en C++ sin que sea Big Int (o como usar strings)
+
