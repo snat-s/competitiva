@@ -2,13 +2,7 @@
 #+author: Santiago Pedroza Díaz
 #+startup: indent latexpreview
 
-* Introducción
-
-  Este es el algoritmario que e estado haciendo conforme a pasado el tiempo.
-  Si utilizas =Emacs= puedes exportar a =pdf= o =epub= si son más cómodos que una página
-  web.
-
-* Estructuras de Datos de mortales y medio mortales
+* COMMENT Estructuras de Datos de mortales y medio mortales
  
 ** Clásicas
 
@@ -44,7 +38,7 @@
 ** Disjointed Set Union (DSU)
 *** Union by Rank
 
-    Funcion en tiempo $O(log(N))$ por operación.
+    Función en tiempo $O(log(N))$ por operación.
 
     #+begin_src C++
     struct DSU {
@@ -203,7 +197,7 @@
     }
     #+end_src
 ** Single Source Shortest Path
-*** Dijikstra
+*** Dijikstra $Nlog(N)$
     #+begin_src C++
     vector<vector<pair<ll,ll>>> adj(n+1); // b, w
     priority_queue<tuple<ll, ll>> pq; // w, a
@@ -233,11 +227,21 @@
 	    }
      }
     #+end_src
-*** Bellman Ford
+    
+*** Bellman Ford $O(V*E)$
+Tienes un vector de distancias que inicia en infinito, y el lugar de
+donde quieres iniciar lo pones en 0 =distancia[<lugar de inicio>] = 0=.
 
-    #+begin_src C++
-
-    #+end_src
+#+begin_src C++
+for (int i = 1; i <= n; ++i) {
+        for(auto e : lista) {
+                int a, b, w;
+                tie(a,b,w) = e;
+                if(distancia[a] == INF) continue;
+                distancia[b] = min(distancia[b], distancia[a]+w);
+        }
+ }
+#+end_src
 
 *** Floyd Warshall $O(n^3)$
 
@@ -251,6 +255,7 @@
      for(int i = 0; i < n; i++) {
              for(int j = 0; j < n; j++) {
                      if(i == j) mat[i][j] = 0;
+                     else if(mat[i][j]) distance[i][j] = mat[i][j];
                      else mat[i][j] = INF;
              }
       }
@@ -259,13 +264,13 @@
      // de los caminos conocidos
 
      // Floyd Warshall
-     for(int i = 0; i < n; i++) {
-             for(int j = 0; j < n; j++) {
-                     for(int k = 0; k < n; k++) {
-                             mat[j][k]=min(mat[j][k], mat[j][i]+mat[i][k]);
-                     }
-             }
-      }
+     for(int i = 1; i <= n; i++) {
+                for(int j = 1; j <= n; j++) {
+                        for(int k = 1; k <=n; k++) {
+                                distance[j][k] = min(distance[j][k], distance[j][i]+distance[i][k]);
+                        }
+                }
+        }
 #+end_src
 
 * Árboles
@@ -388,7 +393,7 @@ struct node {
 };
 #+end_src
 
-* Matemáticas
+* COMMENT Matemáticas
 
 ** Criba de Erastostenes
 
