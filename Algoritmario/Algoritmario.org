@@ -19,22 +19,49 @@
 *** Multiset
 
 * Gráficas
+
 ** Representaciónes de Gráficas
+
 *** Matrices de adyacencia
+#+begin_src C++
+vector<vector<int>> adj(N,vector(M, 0));
+#+end_src
 
 *** Matrices de 
+#+begin_src C++
 
+#+end_src
 ** BFS y DFS
 *** DFS
     #+begin_src C++
 
     #+end_src
 
-*** BFS
+*** BFS $O(V+E)$
+
+Puede usarse en una gráfica explícita con una lista de adyacencias:
 
     #+begin_src C++
-
+    void bfs(const vector<vector<int>> &adj, int start, vector<bool> &visited) {
+            queue<int> q;
+            q.push(start);
+            visited[start] = true;
+            while(!q.empty()) {
+                    int node = q.front();
+                    q.pop();
+                    for(auto u : adj[node]) {
+                            if(!visited[u])
+                                    q.push(u);
+                    }
+            }
+            return ans;
+    }
     #+end_src
+
+o con una gráfica implícita (por ejemplo un laberínto)
+
+#+begin_src C++
+#+end_src
 ** Disjointed Set Union (DSU)
 *** Union by Rank
 
@@ -66,10 +93,12 @@
 	    }
     }
     #+end_src
+    
 *** Path Compression
 
     Es bastante rápida y en la práctica si quieres implementar algo desde
-    cero puedes llegar a usarla. Corre en tiempo $O(log(N))$ amortizado.
+    cero puedes llegar a usarla. Corre en tiempo $O(log(N))$ amortizado. Pero
+    cada operación puede llegar a ser $O(N)$.
 
     #+begin_src C++
     struct DSU {
@@ -243,7 +272,7 @@ for (int i = 1; i <= n; ++i) {
  }
 #+end_src
 
-*** Floyd Warshall $O(n^3)$
+*** Floyd Warshall $O(n^3)$ (APSP)
 
     Sirve para cuando te preguntan varias veces la misma pregunta
     de encontrar el camino más corto.
@@ -271,6 +300,59 @@ for (int i = 1; i <= n; ++i) {
                         }
                 }
         }
+#+end_src
+** Topological Sort
+
+En este caso la gráfica va de 1 a n.
+
+#+begin_src C++
+vector<vector<int>> adj(n+1);
+vector<bool> visited(n+1, false); //cuidado con este, vector bool puede ser traicionero
+
+int a, b;
+
+for (int i = 1; i <= m; ++i) {
+	std::cin >> a >> b;
+	adj[a].push_back(b);
+ }
+
+vector<int> inDegree(n+1, 0);
+queue<int> q;
+
+for (int i = 1; i <= n; ++i) {
+	for(int v : adj[i]) {
+		inDegree[v]++;
+	}
+ }
+
+for(int i = 1; i <= n; i++) {
+	if (inDegree[i] == 0) {
+		q.push(i);
+	}
+ }
+
+int index = 1;
+vector<int> order(n+1,0);
+
+while (!q.empty()) {
+	int v = q.front();
+	q.pop();
+	order[index++] = v;
+
+	for(int u : adj[v]) {
+		inDegree[u]--;
+		if (inDegree[u] == 0) {
+			q.push(u);
+		}
+	}
+
+ }
+if (index!=n) {
+	std::cout << "Impossible\n";
+ }
+for(int a : order) {
+	if(a) cout << a << " ";
+ }
 #+end_src
 
 * Árboles
